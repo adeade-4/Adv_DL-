@@ -1,0 +1,23 @@
+---
+title: "D7047E LAB2"
+author: 
+  - "Adesijibomi Aderinto"
+  - "Oghenero Jeremiah Opia"
+date: "2025-04-28"
+output: pdf_document
+---
+
+
+
+![Image 1 chaptGPT]("C:\Users\Sijibomi\Documents\LTU\Advd_DL\ChatGPT_image.png")
+
+![Image 2 chaptGPT]("C:\Users\Sijibomi\Documents\LTU\Advd_DL\ChatGPT_image_2.png")
+ 
+ 
+ 
+- It takes time to generate in the image, due to the large data structure and the complexities of the models
+
+- In the football iamge As show in highlighted parts of the images, some parts are not completed, 
+
+- Small hands
+

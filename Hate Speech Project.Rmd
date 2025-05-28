@@ -1,0 +1,101 @@
+---
+title: "Advanced Deep Learning Project Group 15"
+author:
+- Adesijibomi Aderinto
+- Oghenero Jeremiah Opia
+date: "2025-05-18"
+output:
+  powerpoint_presentation:
+    reference_doc: C:\Users\Sijibomi\Desktop\Presentation2.pptx
+  beamer_presentation: default
+bibliography: ReferenceA.bib
+---
+
+
+## Objectives
+
+General information about the project.
+
+Project goals:
+
+-  Binary sentimental classification between hate and non hate speech. 
+
+Data Sources:
+
+- Automated Hate Speech Detection and the Problem of Offensive Language [@mrmorj2022kaggle]
+- DistilBert pretrained model [@sanh2019distilbert]
+- Test evaluation data [@ashwiniyer176_toxic_tweets]
+
+## Methodology
+Implementation of a learning algorithm for binary classification capable of distinguishing clear and cloudy skies.
+
+- Text Preprocessing: Removes;
+  - Removes Emails
+  - Removes IP addresses
+  - Removes Punctuation
+  - Removes Numbers
+  - Removes stopwords using NLTK
+  - Tokenizes words.
+
+#![Data preprocessing]("C:\Users\Sijibomi\Documents\LTU\AIKMR\Datapreprocessing.png")
+
+ 
+## 1. Model Training and Logging
+
+- Custom Bidirectional LSTM model using Amazon hate speech data:
+
+  - Uses Tokenizer and pad_sequences.
+
+  - Train/val/test split.
+
+  - Simple architecture: Embedding → BiLSTM → Dense.
+
+  - Uses binary_crossentropy, tracks accuracy.
+  
+- Logs:
+
+  - Loss/accuracy (train & val) to TensorBoard.
+
+  - Confusion matrix
+
+  - Word & sentence embeddings
+
+  - Text predictions with probabilities
+ 
+## 2. Pretrained DistilBERT model (if use_pretrained=True)
+
+- Loads Amazon Polarity dataset (subset).
+
+- Tokenized using DistilBertTokenizerFast.
+
+- Sets class weights to handle imbalance.
+
+- Uses Hugging Face's Trainer with a custom WeightedLossTrainer.
+
+- Logs:
+
+  - Train/test accuracy to TensorBoard
+
+  - Test set embeddings (from CLS token)
+  
+## 3. Evaluation on Unlabeled Data: evaluate_on_unlabeled_data(...)
+
+- Preprocesses and tokenizes new input data.
+
+- Runs model inference on either:
+
+- Keras model: generates predictions, sentence embeddings
+
+- Pretrained model: uses BERT’s CLS token output as embeddings
+
+- Logs to TensorBoard:
+
+  - Predictions and probabilities
+
+  - Text with predicted vs. true labels
+
+  - Confusion matrix (if labels available)
+
+  - Sentence embeddings
+  
+  
