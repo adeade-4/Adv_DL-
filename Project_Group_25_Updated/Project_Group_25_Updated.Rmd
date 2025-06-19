@@ -1,0 +1,228 @@
+---
+title: "D7054E Project LAB Updated"
+author: 
+  - "Adesijibomi Aderinto"
+  - "Oghenero Jeremiah Opia"
+date: "2025-04-06"
+output: pdf_document
+toc: true
+toc_depth: 3
+number_sections: true
+---
+
+\newpage 
+
+# Aim: 
+Project aim to classify and predict diabetes outcomes using plasma glucose concentrations and age as features using logistic regression machine learning model.
+
+# Hypothesis: 
+The probabilistic equation of the estimated model will depend on the features and the 
+estimated model parameters. 
+
+**Dataset**:
+
+The Pima Indian Diabetes Dataset is a well-known dataset used for predicting the onset of 
+diabetes based on diagnostic measures. It originates from the National Institute of Diabetes 
+and Digestive and Kidney Diseases and contains information on 768 women from a population 
+near Phoenix, Arizona, USA3. The dataset is often used in machine learning and data science 
+projects to analyze and predict diabetes. 
+
+**Dataset Description**
+
+The dataset includes the following attributes:
+
+- Pregnancies: Number of times pregnant 
+- Glucose: Plasma glucose concentration after a 2-hour oral glucose tolerance test 
+- BloodPressure: Diastolic blood pressure (mm Hg) 
+- SkinThickness: Triceps skinfold thickness (mm) 
+- Insulin: 2-hour serum insulin (mu U/ml) 
+- BMI: Body mass index (weight in kg/(height in m)^2) 
+- DiabetesPedigreeFunction: Diabetes pedigree function 
+- Age: Age (years) 
+- Outcome: Class variable (0 or 1) indicating whether the patient tested positive for diabetes2.
+
+# Data Privacy and GDPR Compliance:
+The dataset used in this project, the Pima Indian Diabetes Dataset, contains sensitive personal information, including health-related attributes such as glucose levels, blood pressure, and BMI. To ensure compliance with the General Data Protection Regulation (GDPR), all data is anonymized and does not include any personally identifiable information (PII). The data has been obtained from publicly available sources, and any analysis conducted will be strictly for academic and research purposes, with no attempt to identify or track individual subjects. Any use of the data will adhere to ethical guidelines and data privacy regulations, and the results will be presented in an aggregated and anonymized form to ensure individual privacy is maintained. Additionally, the dataset will not be shared in a way that could lead to the identification of any individual or breach data protection laws.
+
+\newpage 
+
+
+## Preparing python environment in R
+
+```{r libraries, warning=FALSE, message=FALSE,comment="", echo = TRUE, results='hide'}
+library(reticulate)
+library(mongolite)
+library(ggplot2)
+library(dplyr)
+```
+
+## Visualize data features 
+
+```{r, comment=""}
+
+data <- read.csv("C:\\Users\\Sijibomi\\Documents\\LTU\\DS\\diabetes.csv") #load data
+
+colnames(data) <- c("pregnant", "Glucose", "blood", "skin", "insulin", "bmi", "dpf", "Age", "Diabetes") # change colums name
+
+data %>% #plot function
+  ggplot(aes(x=Glucose,y=Age,color=as.factor(Diabetes)))+
+  geom_point(size=1,aes(shape=as.factor(Diabetes)))+
+  scale_color_brewer(palette = "Set2",name="Diabetes",labels=c("Not Diabetic","Diabetic"))+ 
+  scale_shape(name="Diabetes",labels=c("Not Diabetic","Diabetic"))+
+  ylab("Age")+
+  xlab("Glucose concentration")
+
+head(data,5) #display first rows of loaded data
+```
+
+
+From plots, we see observations who do not have diabetes generally appear to be younger and have lower plasma glucose concentration than those who have diabetes, but it becomes difficult for logistic regression to predict classes.
+
+With this we employ some feature engineering by stating a threshold to be able to classify
+
+## Feature engineering at threshold equals to 0.5
+
+```{r,comment=""}
+#change diabetes to categorical variable, used as target in logistic regression
+data$Diabetes = as.factor(data$Diabetes) 
+
+data_fit = glm(formula = Diabetes ~ .,family = "binomial",data = data) #model
+
+data_pred = predict(data_fit, type ="response" )# predictions
+
+data$threshold_1 = ifelse(data_pred > 0.5,1,0) #thresholds, if higher than 0.5 replace with 1 otherwise 0
+
+data$threshold_1 = as.factor(data$threshold_1) #change to categorical variable
+data %>% #plot function
+  ggplot(aes(x=Glucose, y=Age, color = as.factor(threshold_1)))+
+  geom_point(size=1,aes(shape=as.factor(Diabetes)))+
+  scale_color_brewer(palette = "Set2",name="Diabetes",labels=c("Not Diabetic","Diabetic"))+
+  scale_shape(name="Diabetes",labels=c("Not Diabetic","Diabetic"))+
+  ylab("Age")+
+  xlab("Glucose concentration")+
+  ggtitle("At threshold 0.5 for classification")
+
+summary(data_fit) #model summary
+#print(data)
+#print(data_pred)
+```
+
+### Probablistic equation
+
+The coefficients indicate that as Age and Plasma Glucose increase, the probability of having diabetes also increases. Specifically, for each unit increase in Age, the log odds of having diabetes increase by 0.03564, and for each unit increase in Plasma Glucose, the log odds increase by 0.02478 $$E(Y_{i}) \frac{1}{1 + exp - ({\beta_{0} + \beta_{1}{x_{1}}}+\beta_{2}{x_{1}})}$$ 
+$$E(Y_{i}) = \frac{exp(-5.91245 + 0.03564 \cdot Glucose + 0.02478 \cdot Age)}{1 + exp(-5.91245 + 0.03564 \cdot Glucose + 0.02478 \cdot Age) } $$
+
+### Mean squared error/ Loss function at threshold 0.5
+
+```{r,comment=""}
+data_tb <- table(data$Diabetes, data$threshold_1) #mean square error
+MSE_data <- 1- sum(diag(data_tb))/sum(data_tb)
+MSE_data
+```
+
+### Plots with new threshold 0.5 with slop and intercept
+
+```{r}
+data %>% #plot function
+  ggplot(aes(x=Glucose, y=Age, color=as.factor(threshold_1)))+
+  geom_point(size=1,aes(shape=as.factor(Diabetes)))+
+  scale_color_brewer(palette = "Set2",name="Diabetes",labels=c("Not Diabetic","Diabetic"))+
+  scale_shape(name="Diabetes",labels=c("Not Diabetic","Diabetic"))+
+  ylab("Age")+
+  xlab("Glucose concentration")+
+  geom_abline(intercept = -coef(data_fit)[1]/coef(data_fit)[3],
+              slope = -coef(data_fit)[2]/coef(data_fit)[3])
+```
+
+## Feature engineering at threshold equals to 0.2
+
+```{r}
+data$threshold_2 <- ifelse(data_pred > 0.2,1,0) #thresholds, if higher than 0.2 replace with 1 otherwise 0
+data %>% #plot function
+  ggplot(mapping=aes(x=Glucose, y=Age, color=as.factor(threshold_2)))+
+  geom_point(size=1,aes(shape=as.factor(Diabetes)))+
+  scale_color_brewer(palette = "Set2",name="Diabetes",labels=c("Not Diabetic","Diabetic"))+
+  scale_shape(name="Diabetes",labels=c("Not Diabetic","Diabetic"))+
+  ylab("Age")+
+  xlab("Glucose concentration")+
+  ggtitle("At threshold 0.2 for classification")
+```
+
+### Mean squared error/ Loss function at threshold 0.2
+
+```{r,comment=""}
+data_tb_11 <- table(data$Diabetes, data$threshold_2)
+MSE_data_11 <- 1- sum(diag(data_tb_11))/sum(data_tb_11) #mean square error
+MSE_data_11
+```
+
+## Feature engineering at threshold equals to 0.8
+
+```{r}
+data$threshold_3 <- ifelse(data_pred > 0.8,1,0) #thresholds, if higher than 0.8 replace with 1 otherwise 0
+data %>% #plot function
+  ggplot(mapping=aes(x=Glucose, y=Age, color=as.factor(threshold_3)))+
+  geom_point(size=1,aes(shape=as.factor(Diabetes)))+
+  scale_color_brewer(palette = "Set2",name="Diabetes",labels=c("Not Diabetic","Diabetic"))+
+  scale_shape(name="Diabetes",labels=c("Not Diabetic","Diabetic"))+
+  ylab("Age")+
+  xlab("Glucose concentration")+
+  ggtitle("At threshold 0.8 for classification")
+```
+
+### Mean squared error/ Loss function at threshold 0.8
+
+```{r,comment=""}
+data_tb_12 <- table(data$Diabetes, data$threshold_3)
+MSE_data_12 <- 1- sum(diag(data_tb_12))/sum(data_tb_12) #mean square error
+MSE_data_12
+```
+
+
+## Polynomial Order
+
+```{r, comment=""}
+# Creating 4rd-degree polynomial features
+data$Z1 <- data$Glucose^4
+data$Z2 <- data$Glucose^3*data$Age
+data$Z3 <- data$Glucose^2*data$Age^2
+data$Z4 <- data$Glucose*data$Age^3
+data$Z5 <- data$Age^4
+
+# Fit logistic regression model with 4th-degree polynomial features
+data_fit_1 <- glm(formula = Diabetes ~ Z1 + Z2 + Z3 + Z4 + Z5, data = data, family = "binomial")
+
+# Predict probabilities
+data_pred_1 <- predict(data_fit_1, type = "response")
+
+# Convert probabilities to binary classification (0.5 threshold)
+data$poly <- ifelse(data_pred_1 >= 0.5, 1, 0)
+
+# Print summary of the model
+summary(data_fit_1)
+#print(data)
+
+```
+
+Finally we employed 4th degree polynomial regression so as to introduce some linearity in our model, however it should be noted the higher the degree the more the model is susceptible to overfitting.
+
+```{r}
+data_grid <- expand.grid(seq(min(data$Age),max(data$Age),length.out=500),seq(min(data$Glucose),max(data$Glucose),length.out=500)) 
+
+colnames(data_grid) <- c("Age","Glucose")
+data_grid$Z1 <- data_grid$Glucose^4
+data_grid$Z2 <- data_grid$Glucose^3*data_grid$Age
+data_grid$Z3 <- data_grid$Glucose^2*data_grid$Age^2
+data_grid$Z4 <- data_grid$Glucose*data_grid$Age^3
+data_grid$Z5 <- data_grid$Age^4
+
+data_pred_1 <- predict(data_fit_1, type ="response", newdata = data_grid )
+
+data_grid$poly <- ifelse(data_pred_1 >= 0.5,1,0)
+ggplot(data_grid, aes(x=Glucose, y=Age,fill=as.factor(poly)))+
+  geom_raster(alpha = 0.3, interpolate = TRUE)+
+  geom_point(data=data,aes(x=Glucose, y=Age, color=as.factor(Diabetes)))+
+  theme(legend.position = "none")
+
+```
+
