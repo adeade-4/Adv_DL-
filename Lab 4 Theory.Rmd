@@ -37,7 +37,9 @@ Assume that the transition function is equal to 1, $\gamma$ = 0.9 and H = 100.
 
 Assume that the transition function is equal to 0.8, $\gamma$ = 0.7 and H = 100.
 
+- V(4,3) = 1
 
+- V(3,3) = 0.56
 
 
 ### Task 2
